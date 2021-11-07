@@ -1,0 +1,24 @@
+import dto.CustomerDto;
+import validator.DtoValidator;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public class Main {
+
+    public static void main(String[] args) throws IllegalAccessException {
+        CustomerDto customerDto = new CustomerDto();
+
+        customerDto.setName("P");
+        customerDto.setBirthDay(LocalDate.of(2018, 10, 3));
+        customerDto.setEmail("poxosmail.com");
+        customerDto.setDiscountRate(1000);
+
+        DtoValidator dtoValidator = new DtoValidator();
+        List<String> strings = dtoValidator.validateDto(customerDto);
+        for (String message : strings) {
+            System.out.println(message);
+        }
+    }
+
+}
