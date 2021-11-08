@@ -13,65 +13,93 @@ import java.util.regex.Pattern;
 public class DtoValidator {
     private static final String REGEX = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
 
-    public List<String> validateDto(Object dto) throws IllegalAccessException {
+    public static List<String> validateDto(Object dto) throws IllegalAccessException {
         List<String> messages = new LinkedList<>();
         Field[] declaredFields = dto.getClass().getDeclaredFields();
         for (Field declaredField : declaredFields) {
             declaredField.setAccessible(true);
             if (declaredField.isAnnotationPresent(Length.class)) {
-                StringBuilder lengthMessage = new StringBuilder();
-                Length annotation = declaredField.getAnnotation(Length.class);
-                String name = (String) declaredField.get(dto);
-                if (name.length() < annotation.min() || name.length() > annotation.max()) {
-                    lengthMessage.append("Invalid format : ")
-                            .append(declaredField.getName())
-                            .append(", ").append(" Min length: ")
-                            .append(annotation.min()).append(" Max length: ")
-                            .append(annotation.max()).append(" Actual: ")
-                            .append(name);
+                String message = checkLength(declaredField, dto);
+                if (!message.isEmpty()) {
+                    messages.add(message);
                 }
-                messages.add(lengthMessage.toString());
             } else if (declaredField.isAnnotationPresent(Email.class)) {
-                StringBuilder emailMessage = new StringBuilder();
-                String email = (String) declaredField.get(dto);
-                Pattern pattern = Pattern.compile(REGEX);
-                if (!pattern.matcher(email).matches()) {
-                    emailMessage.append("Invalid format for email " + " : ")
-                            .append(email).append(" Actual :  someemail@domain.com");
+                String message = checkEmail(declaredField, dto);
+                if (!message.isEmpty()) {
+                    messages.add(message);
                 }
-                messages.add(emailMessage.toString());
             } else if (declaredField.isAnnotationPresent(AdultHood.class)) {
-                StringBuilder adultHoodMessage = new StringBuilder();
-                LocalDate birthDate = (LocalDate) declaredField.get(dto);
-                int years = Period.between(birthDate, LocalDate.now()).getYears();
-                if (years < 20) {
-                    adultHoodMessage.append("You haven't permission " + " your age : ")
-                            .append(years).append(" Actual 20 or old");
+                String message = checkAdultHood(declaredField, dto);
+                if (!message.isEmpty()) {
+                    messages.add(message);
                 }
-                messages.add(adultHoodMessage.toString());
             } else {
-                StringBuilder minMaxMessage = new StringBuilder();
-                int discountRate = (Integer) declaredField.get(dto);
-                Annotation[] annotations = declaredField.getAnnotations();
-                Min min = null;
-                Max max = null;
-                for (Annotation annotation : annotations) {
-                    if (annotation instanceof Min) {
-                        min = (Min) annotation;
-                    } else {
-                        max = (Max) annotation;
-                    }
+                String message = checkMinMax(declaredField, dto);
+                if (!message.isEmpty()) {
+                    messages.add(message);
                 }
-                if (min != null && (discountRate < min.value())) {
-                    minMaxMessage.append("Discount Min must be greater than : ").append(min.value());
-                }
-                if (max != null && (discountRate > max.value())) {
-                    minMaxMessage.append(" Discount Max value must be smaller than : ").append(max.value());
-                }
-                messages.add(minMaxMessage.toString());
-
             }
         }
         return messages;
     }
+
+    private static String checkLength(Field declaredField, Object dto) throws IllegalAccessException {
+        StringBuilder lengthMessage = new StringBuilder();
+        Length annotation = declaredField.getAnnotation(Length.class);
+        String name = (String) declaredField.get(dto);
+        if (name.length() < annotation.min() || name.length() > annotation.max()) {
+            lengthMessage.append("Invalid format : ")
+                    .append(declaredField.getName())
+                    .append(", ").append(" Min length: ")
+                    .append(annotation.min()).append(" Max length: ")
+                    .append(annotation.max()).append(" Actual: ")
+                    .append(name);
+        }
+        return lengthMessage.toString();
+    }
+
+    private static String checkEmail(Field declaredField, Object dto) throws IllegalAccessException {
+        StringBuilder emailMessage = new StringBuilder();
+        String email = (String) declaredField.get(dto);
+        Pattern pattern = Pattern.compile(REGEX);
+        if (!pattern.matcher(email).matches()) {
+            emailMessage.append("Invalid format for email " + " : ")
+                    .append(email).append(" Actual :  someemail@domain.com");
+        }
+        return emailMessage.toString();
+    }
+
+    private static String checkAdultHood(Field declaredField, Object dto) throws IllegalAccessException {
+        StringBuilder adultHoodMessage = new StringBuilder();
+        LocalDate birthDate = (LocalDate) declaredField.get(dto);
+        int years = Period.between(birthDate, LocalDate.now()).getYears();
+        if (years < 20) {
+            adultHoodMessage.append("You haven't permission " + " your age : ")
+                    .append(years).append(" Actual 20 or old");
+        }
+        return adultHoodMessage.toString();
+    }
+
+    private static String checkMinMax(Field declaredField, Object dto) throws IllegalAccessException {
+        StringBuilder minMaxMessage = new StringBuilder();
+        int discountRate = (Integer) declaredField.get(dto);
+        Annotation[] annotations = declaredField.getAnnotations();
+        Min min = null;
+        Max max = null;
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof Min) {
+                min = (Min) annotation;
+            } else {
+                max = (Max) annotation;
+            }
+        }
+        if (min != null && (discountRate < min.value())) {
+            minMaxMessage.append("Discount Min must be greater than : ").append(min.value());
+        }
+        if (max != null && (discountRate > max.value())) {
+            minMaxMessage.append("Discount Max value must be smaller than : ").append(max.value());
+        }
+        return minMaxMessage.toString();
+    }
+
 }

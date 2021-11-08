@@ -9,16 +9,18 @@ public class Main {
     public static void main(String[] args) throws IllegalAccessException {
         CustomerDto customerDto = new CustomerDto();
 
-        customerDto.setName("P");
+        customerDto.setName("Poxos");
         customerDto.setBirthDay(LocalDate.of(2018, 10, 3));
         customerDto.setEmail("poxosmail.com");
         customerDto.setDiscountRate(1000);
 
-        DtoValidator dtoValidator = new DtoValidator();
-        List<String> strings = dtoValidator.validateDto(customerDto);
-        for (String message : strings) {
-            System.out.println(message);
+        List<String> strings = DtoValidator.validateDto(customerDto);
+        if (!strings.isEmpty()) {
+            for (String message : strings) {
+                System.out.println(message);
+            }
         }
+
     }
 
 }
