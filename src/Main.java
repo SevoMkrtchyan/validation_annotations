@@ -14,7 +14,10 @@ public class Main {
         customerDto.setEmail("poxosmail.com");
         customerDto.setDiscountRate(1000);
 
-        List<String> strings = DtoValidator.validateDto(customerDto);
+        DtoValidator<CustomerDto> validator = new DtoValidator<>();
+
+        List<String> strings = validator.validateDto(customerDto);
+
         if (!strings.isEmpty()) {
             for (String message : strings) {
                 System.out.println(message);

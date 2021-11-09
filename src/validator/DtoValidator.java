@@ -10,10 +10,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class DtoValidator {
+public class DtoValidator<T> {
     private static final String REGEX = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
 
-    public static List<String> validateDto(Object dto) throws IllegalAccessException {
+    public List<String> validateDto(T dto) throws IllegalAccessException {
         List<String> messages = new LinkedList<>();
         Field[] declaredFields = dto.getClass().getDeclaredFields();
         for (Field declaredField : declaredFields) {
@@ -58,7 +58,7 @@ public class DtoValidator {
         return lengthMessage.toString();
     }
 
-    private static String checkEmail(Field declaredField, Object dto) throws IllegalAccessException {
+    private String checkEmail(Field declaredField, T dto) throws IllegalAccessException {
         StringBuilder emailMessage = new StringBuilder();
         String email = (String) declaredField.get(dto);
         Pattern pattern = Pattern.compile(REGEX);
@@ -69,7 +69,7 @@ public class DtoValidator {
         return emailMessage.toString();
     }
 
-    private static String checkAdultHood(Field declaredField, Object dto) throws IllegalAccessException {
+    private String checkAdultHood(Field declaredField, T dto) throws IllegalAccessException {
         StringBuilder adultHoodMessage = new StringBuilder();
         LocalDate birthDate = (LocalDate) declaredField.get(dto);
         int years = Period.between(birthDate, LocalDate.now()).getYears();
@@ -80,7 +80,7 @@ public class DtoValidator {
         return adultHoodMessage.toString();
     }
 
-    private static String checkMinMax(Field declaredField, Object dto) throws IllegalAccessException {
+    private String checkMinMax(Field declaredField, T dto) throws IllegalAccessException {
         StringBuilder minMaxMessage = new StringBuilder();
         int discountRate = (Integer) declaredField.get(dto);
         Annotation[] annotations = declaredField.getAnnotations();
