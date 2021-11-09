@@ -43,7 +43,7 @@ public class DtoValidator<T> {
         return messages;
     }
 
-    private static String checkLength(Field declaredField, Object dto) throws IllegalAccessException {
+    private String checkLength(Field declaredField, T dto) throws IllegalAccessException {
         StringBuilder lengthMessage = new StringBuilder();
         Length annotation = declaredField.getAnnotation(Length.class);
         String name = (String) declaredField.get(dto);
